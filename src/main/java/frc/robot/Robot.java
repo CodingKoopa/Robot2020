@@ -57,6 +57,11 @@ public class Robot extends TimedRobot {
   private final DifferentialDrive m_differentialDrive =
       new DifferentialDrive(m_motorDriveFrontLeft, m_motorDriveFrontRight);
 
+  // Winch
+  private final WPI_VictorSPX m_motorWinch =
+      new WPI_VictorSPX(RoboRIO.kPortMotorWinch);
+  private final boolean m_winchRaised = false;
+
   // Launching
   WPI_VictorSPX m_motorLauncherLeft =
       new WPI_VictorSPX(RoboRIO.kPortMotorLauncherLeft);
@@ -232,6 +237,7 @@ public class Robot extends TimedRobot {
     updateInputs();
     handleState();
     driveSpeed();
+    controlWinch();
     launchBall();
     spinControlPanel();
   }
@@ -323,6 +329,17 @@ public class Robot extends TimedRobot {
       m_differentialDrive.arcadeDrive(
           axisDriveLeftY * Constants.kMultiplierNormalSpeed,
           axisDriveRightX * Constants.kMultiplierNormalSpeed);
+    }
+  }
+
+  /**
+   * Handles winch control.
+   */
+  private void controlWinch() {
+    if (!m_isInControlPanelMode) {
+      boolean buttonDriveA = m_controllerDrive.getRawButton(DriveStation.kIDButtonA);
+      boolean buttonDriveB = m_controllerDrive.getRawButton(DriveStation.kIDButtonB);
+
     }
   }
 
