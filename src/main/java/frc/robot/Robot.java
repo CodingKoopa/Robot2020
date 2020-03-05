@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -80,6 +81,9 @@ public class Robot extends TimedRobot {
       ColorMatch.makeColor(0.361, 0.524, 0.113);
   private final WPI_TalonSRX m_motorControlPanel =
       new WPI_TalonSRX(RoboRIO.kPortMotorControlPanel);
+  private final DoubleSolenoid m_doubleSolenoidControlPanel =
+      new DoubleSolenoid(RoboRIO.kPortDoubleSolenoidForwardControlPanel,
+          RoboRIO.kPortDoubleSolenoidBackwardControlPanel);
   private String m_detectedColorString = "N/A";
   private String m_lastDetectedColorString = "N/A";
   private String m_targetControlPanelColor = "N/A";
@@ -207,6 +211,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopInit() {
+    m_doubleSolenoidControlPanel.set(DoubleSolenoid.Value.kReverse);
+
     m_isInControlPanelMode = false;
     m_isInControlPanelModeLastLoop = false;
 
@@ -344,6 +350,8 @@ public class Robot extends TimedRobot {
    */
   private void spinControlPanel() {
     if (m_isInControlPanelMode) {
+      m_doubleSolenoidControlPanel.set(DoubleSolenoid.Value.kForward);
+
       if (m_controllerManip.getRawButton(DriveStation.kIDButtonRB)) {
         int controlPanelSpinAmountInitial = m_controlPanelSpinAmount;
         // During a match, the amount of revolutions needed to be completed will be
