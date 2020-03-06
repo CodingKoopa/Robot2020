@@ -35,11 +35,9 @@ public final class RoboRIO {
     /** The port of the backward channel of the control panel double solenoid. */
     public static final int kPortDoubleSolenoidBackwardControlPanel = 2;
     /** The port of the forward channel of the winch double solenoid. */
-    // TODO: Verify this port.
-    public static final int kPortDoubleSolenoidForwardWinch = 3;
+    public static final int kPortDoubleSolenoidForwardWinch = 5;
     /** The port of the backward channel of the winch double solenoid. */
-    // TODO: Verify this port.
-    public static final int kPortDoubleSolenoidBackwardWinch = 4;
+    public static final int kPortDoubleSolenoidBackwardWinch = 6;
 
     // Analog Inputs
 
