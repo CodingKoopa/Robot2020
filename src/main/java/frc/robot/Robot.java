@@ -29,8 +29,8 @@ public class Robot extends TimedRobot {
       new Joystick(DriveStation.kPortControllerDrive);
   private final Joystick m_controllerManip =
       new Joystick(DriveStation.kPortControllerManip);
-  private boolean m_buttonDrivePressA = false;
-  private boolean m_buttonDrivePressB = false;
+  private boolean m_buttonDrivePressX = false;
+  private boolean m_buttonDrivePressY = false;
   private boolean m_buttonManipPressA = false;
   private boolean m_buttonManipPressB = false;
   private boolean m_buttonManipPressX = false;
@@ -60,14 +60,16 @@ public class Robot extends TimedRobot {
   private final DifferentialDrive m_differentialDrive =
       new DifferentialDrive(m_motorDriveFrontLeft, m_motorDriveFrontRight);
 
-  // Winch
+  // Winch and Hanger
   private final WPI_VictorSPX m_motorWinch =
       new WPI_VictorSPX(RoboRIO.kPortMotorWinch);
   private final DoubleSolenoid m_doubleSolenoidWinch =
       new DoubleSolenoid(RoboRIO.kPortDoubleSolenoidForwardWinch,
           RoboRIO.kPortDoubleSolenoidBackwardWinch);
-  private final DigitalInput m_limitSwitchSensorWinch = new DigitalInput(2);
-  private boolean m_raiseWinch = false;
+  private final DoubleSolenoid m_doubleSolenoidHanger =
+      new DoubleSolenoid(RoboRIO.kPortDoubleSolenoidForwardHanger,
+          RoboRIO.kPortDoubleSolenoidBackwardHanger);
+  private final DigitalInput m_limitSwitchSensorWinch = new DigitalInput(0);
 
   // Launching
   WPI_VictorSPX m_motorLauncherLeft =
@@ -228,7 +230,6 @@ public class Robot extends TimedRobot {
 
     m_isInControlPanelMode = false;
     m_isInControlPanelModeLastLoop = false;
-    m_raiseWinch = false;
 
     m_detectedColorString = "N/A";
     m_lastDetectedColorString = "N/A";
@@ -246,7 +247,8 @@ public class Robot extends TimedRobot {
     updateInputs();
     handleState();
     driveSpeed();
-    toggleWinch();
+    windWinch();
+    controlHanger();
     launchBall();
     spinControlPanel();
   }
@@ -257,13 +259,10 @@ public class Robot extends TimedRobot {
    * likely just return "false" for any button.
    */
   private void updateInputs() {
-    // Driver controller updates.
-    m_buttonDrivePressA =
-        m_controllerDrive.getRawButtonPressed(DriveStation.kIDButtonA);
-    m_buttonDrivePressB =
-        m_controllerDrive.getRawButtonPressed(DriveStation.kIDButtonB);
-
-    // Manipulator controller updates.
+    m_buttonDrivePressX =
+        m_controllerDrive.getRawButtonPressed(DriveStation.kIDButtonX);
+    m_buttonDrivePressY =
+        m_controllerDrive.getRawButtonPressed(DriveStation.kIDButtonY);
     m_buttonManipPressA =
         m_controllerManip.getRawButtonPressed(DriveStation.kIDButtonA);
     m_buttonManipPressB =
@@ -350,23 +349,39 @@ public class Robot extends TimedRobot {
 
   /**
    * Toggles whether or not the winch is raised or declined.
-   * 
-   * TODO: Rewrite this method to better fit the actual logic of the winch.
-   * 
    */
-  private void toggleWinch() {
-    if (m_buttonDrivePressA) {
-      m_raiseWinch = !m_raiseWinch;
+  private void windWinch() {
+    if (!m_controllerDrive.getRawButton(DriveStation.kIDButtonA)
+        && !m_controllerDrive.getRawButton(DriveStation.kIDButtonB)) {
+      m_motorWinch.set(0);
+    }
+
+    if (m_limitSwitchSensorWinch.get()) {
+      if (m_controllerDrive.getRawButton(DriveStation.kIDButtonB)) {
+        m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kReverse);
+        m_motorWinch.set(-Constants.kSpeedWinchMotor);
+      }
     }
 
     if (!m_limitSwitchSensorWinch.get()) {
-      if (m_raiseWinch) {
-        m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kForward);
-        m_motorWinch.set(1);
-      } else {
-        m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kReverse);
-        m_motorWinch.set(0);
-      }
+      m_motorWinch.set(0);
+    }
+
+    if (m_controllerDrive.getRawButton(DriveStation.kIDButtonA)) {
+      m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kForward);
+      m_motorWinch.set(Constants.kSpeedWinchMotor);
+    }
+  }
+
+  /**
+   * Controls whether or not the hanger is extended.
+   */
+  private void controlHanger() {
+    if (m_buttonDrivePressX) {
+      m_doubleSolenoidHanger.set(DoubleSolenoid.Value.kForward);
+    }
+    if (m_buttonDrivePressY) {
+      m_doubleSolenoidHanger.set(DoubleSolenoid.Value.kReverse);
     }
   }
 

@@ -77,6 +77,8 @@ public final class Constants {
   /** The speed to set the control panel motor to. */
   // TODO: Tune this value.
   public static final double kSpeedControlPanel = 0.25;
+  /** The number to set the winch motor to when raising or retracting. */
+  public static final double kSpeedWinchMotor = 0.25;
   /**
    * The proportionality constant to use for correcting error in maintaining a distance from an
    * object.
