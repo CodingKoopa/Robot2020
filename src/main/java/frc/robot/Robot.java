@@ -3,6 +3,7 @@ package frc.robot;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.Joystick;
@@ -65,6 +66,7 @@ public class Robot extends TimedRobot {
   private final DoubleSolenoid m_doubleSolenoidWinch =
       new DoubleSolenoid(RoboRIO.kPortDoubleSolenoidForwardWinch,
           RoboRIO.kPortDoubleSolenoidBackwardWinch);
+  private final DigitalInput m_limitSwitchSensorWinch = new DigitalInput(2);
   private boolean m_raiseWinch = false;
 
   // Launching
@@ -348,21 +350,20 @@ public class Robot extends TimedRobot {
 
   /**
    * Toggles whether or not the winch is raised or declined.
-   * 
-   * TODO: Verify this is what needs to be done with the winch.
-   * 
    */
   private void toggleWinch() {
     if (m_buttonDrivePressA) {
       m_raiseWinch = !m_raiseWinch;
     }
 
-    if (m_raiseWinch) {
-      m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kForward);
-      m_motorWinch.set(1);
-    } else {
-      m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kReverse);
-      m_motorWinch.set(0);
+    if (!m_limitSwitchSensorWinch.get()) {
+      if (m_raiseWinch) {
+        m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kForward);
+        m_motorWinch.set(1);
+      } else {
+        m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kReverse);
+        m_motorWinch.set(0);
+      }
     }
   }
 
