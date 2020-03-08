@@ -205,6 +205,9 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
+    m_doubleSolenoidControlPanel.set(DoubleSolenoid.Value.kReverse);
+    m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kReverse);
+
     m_isInControlPanelMode = false;
     // Force a state change.
     m_isInControlPanelModeLastLoop = true;
@@ -260,9 +263,6 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopInit() {
-    m_doubleSolenoidControlPanel.set(DoubleSolenoid.Value.kReverse);
-    m_doubleSolenoidWinch.set(DoubleSolenoid.Value.kReverse);
-
     m_compressor.start();
 
     disabledInit();
@@ -345,7 +345,7 @@ public class Robot extends TimedRobot {
           .setBoolean(m_isInControlPanelMode);
     }
 
-    // Set the Shuffleboard control panel values to their defaults when not enabled.
+    // Set the control panel values to their defaults when not enabled.
     if (m_isInControlPanelModeLastLoop != m_isInControlPanelMode) {
       if (m_isInControlPanelMode) {
         // Disallow being in both modes simultaneously.
@@ -354,6 +354,7 @@ public class Robot extends TimedRobot {
           ShuffleboardHelper.m_entryLaunchingMode.setBoolean(false);
         }
       } else {
+        m_doubleSolenoidControlPanel.set(DoubleSolenoid.Value.kReverse);
         m_detectedColorString = "N/A";
         m_lastDetectedColorString = "N/A";
         m_targetControlPanelColor = "N/A";
