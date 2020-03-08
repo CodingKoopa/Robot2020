@@ -17,21 +17,43 @@ public final class ShuffleboardHelper {
   // Shuffleboard General
   public static final ShuffleboardTab m_tabGeneral =
       Shuffleboard.getTab("General");
+
   public static final ShuffleboardLayout m_layoutState =
       m_tabGeneral.getLayout("State", BuiltInLayouts.kGrid).withPosition(0, 0)
           .withSize(3, 1)
-          .withProperties(Map.of("Number of columns", 1, "Number of rows", 1));
+          .withProperties(Map.of("Number of columns", 2, "Number of rows", 1));
+  public static final NetworkTableEntry m_entryLaunchingMode =
+      m_layoutState.add("Launching mode", false)
+          .withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
   public static final NetworkTableEntry m_entryControlPanelMode =
       m_layoutState.add("Control panel mode", false)
           .withWidget(BuiltInWidgets.kToggleSwitch).getEntry();
+
   public static final ShuffleboardLayout m_layoutAutonomous = m_tabGeneral
       .getLayout("Autonomous", BuiltInLayouts.kGrid).withPosition(3, 0)
       .withSize(3, 1).withProperties(Map.of("Label position", "HIDDEN",
           "Number of columns", 1, "Number of rows", 1));
+
   public static final ShuffleboardLayout m_layoutDriving =
-      m_tabGeneral.getLayout("Driving", BuiltInLayouts.kGrid).withPosition(0, 1)
-          .withSize(3, 3)
+      m_tabGeneral.getLayout("Driving (Read only)", BuiltInLayouts.kGrid)
+          .withPosition(0, 1).withSize(3, 3)
           .withProperties(Map.of("Number of columns", 1, "Number of rows", 1));
+
+  public static final ShuffleboardLayout m_layoutBallIntake =
+      m_tabGeneral.getLayout("Ball Intake (Read only)", BuiltInLayouts.kGrid)
+          .withPosition(0, 4).withSize(3, 1)
+          .withProperties(Map.of("Number of columns", 3, "Number of rows", 1));
+  public static final NetworkTableEntry m_entryBallsInStorage =
+      m_layoutBallIntake.add("Balls in storage", 0)
+          .withWidget(BuiltInWidgets.kNumberBar)
+          .withProperties(Map.of("Min", 0, "Max", 3, "Center", 0)).getEntry();
+  public static final NetworkTableEntry m_entryBallDetectedEnter =
+      m_layoutBallIntake.add("Ball @ Enter", false)
+          .withWidget(BuiltInWidgets.kBooleanBox).getEntry();
+  public static final NetworkTableEntry m_entryBallDetectedExit =
+      m_layoutBallIntake.add("Ball @ Exit", false)
+          .withWidget(BuiltInWidgets.kBooleanBox).getEntry();
+
   public static final ShuffleboardLayout m_layoutLaunching =
       m_tabGeneral.getLayout("Launching", BuiltInLayouts.kGrid)
           .withPosition(3, 1).withSize(3, 3)
@@ -45,13 +67,17 @@ public final class ShuffleboardHelper {
           .withWidget(BuiltInWidgets.kNumberBar)
           .withProperties(kPropertiesDistanceSensor).getEntry();
   public static final NetworkTableEntry m_entryDistanceTolerence =
-      m_layoutLaunching.addPersistent("Distance Tolerance", 1)
+      m_layoutLaunching.addPersistent("Distance Tolerance", 0.25)
           .withWidget(BuiltInWidgets.kNumberSlider)
           .withProperties(
               Map.of("Min", 0.0, "Max", 2.0, "Block increment", 0.25))
           .getEntry();
+  public static final NetworkTableEntry m_entryLaunchBall =
+      m_layoutLaunching.add("Launching balls", false)
+          .withWidget(BuiltInWidgets.kBooleanBox).getEntry();
+
   public static final ShuffleboardLayout m_layoutControlPanel =
-      m_tabGeneral.getLayout("Color Sensing", BuiltInLayouts.kGrid)
+      m_tabGeneral.getLayout("Color Sensing (Read only)", BuiltInLayouts.kGrid)
           .withPosition(3, 4).withSize(3, 2)
           .withProperties(Map.of("Number of columns", 2, "Number of rows", 2));
   public static final NetworkTableEntry m_entryDetectedColor =
@@ -62,6 +88,7 @@ public final class ShuffleboardHelper {
       m_layoutControlPanel.add("Target Color", "N/A").getEntry();
   public static final NetworkTableEntry m_entryTargetSpin =
       m_layoutControlPanel.add("Target Spins", 0).getEntry();
+
   public static final ShuffleboardLayout m_layoutVision =
       m_tabGeneral.getLayout("Vision", BuiltInLayouts.kGrid).withPosition(6, 0)
           .withSize(1, 1)
@@ -103,10 +130,26 @@ public final class ShuffleboardHelper {
   public static final Timer m_timerSim = new Timer();
   public static boolean m_isRunningSim = false;
 
+  public static void shuffleboardInit() {
+    m_entryControlPanelMode.setBoolean(false);
+    m_entryLaunchingMode.setBoolean(false);
+
+    m_entryBallsInStorage.setBoolean(false);
+    m_entryBallDetectedEnter.setBoolean(false);
+    m_entryBallDetectedExit.setBoolean(false);
+    m_entryLaunchBall.setBoolean(false);
+
+    m_entryDistanceSensor.setDouble(0);
+
+    m_entryDetectedColor.setString("N/A");
+    m_entryTargetColor.setDouble(0);
+    m_entryTargetSpin.setDouble(0);
+  }
+
   /**
-   * This function is called upon in the robotPeriodic() method of Robot.java.
+   * This function is called upon in the simulationPeriodic() method of Robot.java.
    */
-  public static void shuffleboardPeriodic() {
+  public static void updateSimulations() {
     if (m_entryRunPred.getBoolean(false)) {
       m_entryRunPred.setBoolean(false);
       double horDistance = m_entryHorizontalDistance.getDouble(0);
