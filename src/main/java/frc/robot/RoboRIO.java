@@ -83,6 +83,8 @@ public final class RoboRIO {
       kMaximumReadingUltrasonic - kMinimumReadingUltrasonic;
 
   // Digital Inputs
+  /** The port of the limit switch sensor of the winch. */
+  public static final int kPortLimitSwitchSensorWinch = 0;
   /**
    * The port of the photoelectric sensor at the bottom of the storage, where balls enter. This is a
    * 42EF-D1MNAK-A2.

@@ -77,7 +77,8 @@ public class Robot extends TimedRobot {
   private final DoubleSolenoid m_doubleSolenoidHanger =
       new DoubleSolenoid(RoboRIO.kPortDoubleSolenoidForwardHanger,
           RoboRIO.kPortDoubleSolenoidBackwardHanger);
-  private final DigitalInput m_limitSwitchSensorWinch = new DigitalInput(0);
+  private final DigitalInput m_limitSwitchSensorWinch =
+      new DigitalInput(RoboRIO.kPortLimitSwitchSensorWinch);
 
   // Ball Intake
   private final WPI_TalonSRX m_motorIntake =
