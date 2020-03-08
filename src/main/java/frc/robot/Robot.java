@@ -212,6 +212,7 @@ public class Robot extends TimedRobot {
     ShuffleboardHelper.m_entryControlPanelMode
         .setBoolean(m_isInControlPanelMode);
     m_isInLaunchingMode = false;
+    // Force a state change.
     m_isInLaunchingModeLastLoop = true;
     ShuffleboardHelper.m_entryLaunchingMode.setBoolean(m_isInLaunchingMode);
     // Running this method will update Shuffleboard to show "N/A" and such, which is desirable while the
@@ -333,14 +334,18 @@ public class Robot extends TimedRobot {
           .getBoolean(m_isInControlPanelMode);
     }
 
-    // If control panel mode is enabled and the robot is driven, disable it.
-    if ((Math.abs(m_controllerDrive.getRawAxis(DriveStation.kIdAxisLeftY)) > 0.5
+    // If launching or control panel mode is enabled and the robot is driven via controller, disable it.
+    if (Math.abs(m_controllerDrive.getRawAxis(DriveStation.kIdAxisLeftY)) > 0.5
         || Math.abs(
-            m_controllerDrive.getRawAxis(DriveStation.kIdAxisRightX)) > 0.5)
-        && m_isInControlPanelMode) {
-      m_isInControlPanelMode = false;
-      ShuffleboardHelper.m_entryControlPanelMode
-          .setBoolean(m_isInControlPanelMode);
+            m_controllerDrive.getRawAxis(DriveStation.kIdAxisRightX)) > 0.5) {
+      if (m_isInControlPanelMode) {
+        m_isInControlPanelMode = false;
+        ShuffleboardHelper.m_entryControlPanelMode
+            .setBoolean(m_isInControlPanelMode);
+      } else if (m_isInLaunchingMode) {
+        m_isInLaunchingMode = false;
+        ShuffleboardHelper.m_entryLaunchingMode.setBoolean(m_isInLaunchingMode);
+      }
     }
 
     // Set the control panel values to their defaults when not enabled.
@@ -366,6 +371,7 @@ public class Robot extends TimedRobot {
         ShuffleboardHelper.m_entryConfidence.setDouble(0);
       }
     }
+    // Set the launching values to their defaults when not enabled.
     if (m_isInLaunchingModeLastLoop != m_isInLaunchingMode) {
       if (m_isInLaunchingMode) {
         // Disallow being in both modes simultaneously.
@@ -421,7 +427,7 @@ public class Robot extends TimedRobot {
   private void intakeBalls() {
     // If the manipulator holds LT, and the storage isn't full, activate the intake.
     // TODO: Is this ballsInStorage check putting too much trust in the sensor?
-    if (m_controllerDrive.getRawAxis(DriveStation.kIdAxisLt) > 0.50
+    if (m_controllerManip.getRawAxis(DriveStation.kIdAxisLt) > 0.50
         && m_ballsInStorage < 3)
       m_motorIntake.set(Constants.kSpeedIntake);
     else
